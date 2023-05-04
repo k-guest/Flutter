@@ -4,40 +4,6 @@ import 'package:lpdw_flutter/res/app_colors.dart';
 import 'package:lpdw_flutter/res/app_icons.dart';
 import 'package:lpdw_flutter/res/app_vectorial_images.dart';
 
-void main() {
-  runApp(const MyApp());
-}
-
-class MyApp extends StatelessWidget {
-  const MyApp({Key? key}) : super(key: key);
-
-  @override
-  Widget build(BuildContext context) {
-    return MaterialApp(
-      theme: ThemeData(
-        primaryColor: AppColors.blue,
-        primaryColorLight: AppColors.blueLight,
-        primaryColorDark: AppColors.blueDark,
-        fontFamily: 'Avenir',
-        appBarTheme: const AppBarTheme(
-          centerTitle: false,
-          backgroundColor: AppColors.white,
-          elevation: 0.0,
-          iconTheme: IconThemeData(
-            color: AppColors.blue,
-          ),
-          titleTextStyle: TextStyle(
-            color: AppColors.blue,
-            fontSize: 18.0,
-            fontWeight: FontWeight.bold,
-          ),
-        ),
-      ),
-      home: const HomePage(),
-    );
-  }
-}
-
 class HomePage extends StatelessWidget {
   const HomePage({
     Key? key,
