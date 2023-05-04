@@ -1,6 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:lpdw_flutter/res/app_colors.dart';
 import 'package:lpdw_flutter/screens/details/screen_details.dart';
+import 'package:lpdw_flutter/screens/homepage/ecran_vide.dart';
 
 void main() {
   runApp(const MyApp());
@@ -60,7 +61,22 @@ class MyApp extends StatelessWidget {
           type: BottomNavigationBarType.fixed,
         ),
       ),
-      home: const ProductDetails(),
+      routes: {
+        '/': (context) => const HomePage(),
+        '/details': (context) {
+          dynamic arguments = ModalRoute.of(context)?.settings.arguments;
+
+          if (arguments is! String) {
+            throw Exception('Please provide a barcode as the argument!');
+          }
+
+          return ProductDetails(
+            args: ProductDetailsArgs(
+              barcode: arguments,
+            ),
+          );
+        },
+      },
     );
   }
 }

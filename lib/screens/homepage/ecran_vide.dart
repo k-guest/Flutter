@@ -41,13 +41,10 @@ class HomePage extends StatelessWidget {
   }
 
   void openNextScreen(BuildContext context) {
-    ScaffoldMessenger.of(context)
-      ..clearSnackBars()
-      ..showSnackBar(
-        const SnackBar(
-          content: Text('Click sur le bouton'),
-        ),
-      );
+    Navigator.of(context).pushNamed(
+      '/details',
+      arguments: '123456789',
+    );
   }
 }
 

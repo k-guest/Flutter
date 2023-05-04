@@ -5,6 +5,7 @@ import 'package:lpdw_flutter/screens/details/tabs/details_info.dart';
 import 'package:lpdw_flutter/screens/details/tabs/details_nutrition.dart';
 import 'package:lpdw_flutter/screens/details/tabs/details_nutritional_values.dart';
 import 'package:lpdw_flutter/screens/details/tabs/details_summary.dart';
+import 'package:share_plus/share_plus.dart';
 
 class ProductContainer extends InheritedWidget {
   final Product product;
@@ -28,9 +29,21 @@ class ProductContainer extends InheritedWidget {
   }
 }
 
-//region Ecran de détails
+class ProductDetailsArgs {
+  final String barcode;
+
+  const ProductDetailsArgs({
+    required this.barcode,
+  }) : assert(barcode != '');
+}
+
 class ProductDetails extends StatefulWidget {
-  const ProductDetails({Key? key}) : super(key: key);
+  final ProductDetailsArgs args;
+
+  const ProductDetails({
+    Key? key,
+    required this.args,
+  }) : super(key: key);
 
   @override
   State<ProductDetails> createState() => _ProductDetailsState();
@@ -67,19 +80,29 @@ class _ProductDetailsState extends State<ProductDetails> {
           body: Stack(
             children: [
               Positioned.fill(child: child),
-              const Align(
+              Align(
                 alignment: AlignmentDirectional.topStart,
                 child: _HeaderIcon(
                   icon: AppIcons.close,
                   tooltip: 'Fermer l\'écran',
+                  onPressed: () {
+                    Navigator.of(context).maybePop();
+                  },
                 ),
               ),
-              const Align(
+              Align(
                 alignment: AlignmentDirectional.topEnd,
-                child: _HeaderIcon(
-                  icon: AppIcons.share,
-                  tooltip: 'Partager',
-                ),
+                child: Builder(builder: (context) {
+                  return _HeaderIcon(
+                    icon: AppIcons.share,
+                    tooltip: 'Partager',
+                    onPressed: () {
+                      Share.share(
+                        'https://fr.openfoodfacts.org/produit/${ProductContainer.of(context).product.barcode}',
+                      );
+                    },
+                  );
+                }),
               ),
             ],
           ),
