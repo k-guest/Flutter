@@ -1,9 +1,10 @@
 import 'package:flutter/material.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lpdw_flutter/model/product.dart';
 import 'package:lpdw_flutter/res/app_colors.dart';
 import 'package:lpdw_flutter/res/app_icons.dart';
 import 'package:lpdw_flutter/res/app_images.dart';
-import 'package:lpdw_flutter/screens/details/screen_details.dart';
+import 'package:lpdw_flutter/screens/details/product_bloc.dart';
 
 class ProductInfo extends StatefulWidget {
   static const double kImageHeight = 300.0;
@@ -45,7 +46,10 @@ class _ProductInfoState extends State<ProductInfo> {
       },
       child: Stack(children: [
         Image.network(
-          ProductContainer.of(context).product.picture ?? '',
+          (BlocProvider.of<ProductBloc>(context).state as LoadedProductState)
+                  .product
+                  .picture ??
+              '',
           width: double.infinity,
           height: ProductInfo.kImageHeight,
           fit: BoxFit.cover,
@@ -185,36 +189,40 @@ class _Header extends StatelessWidget {
   @override
   Widget build(BuildContext context) {
     final TextTheme textTheme = Theme.of(context).textTheme;
-    final Product product = ProductContainer.of(context).product;
 
-    return Column(
-      mainAxisSize: MainAxisSize.min,
-      crossAxisAlignment: CrossAxisAlignment.start,
-      children: [
-        if (product.name != null)
-          Text(
-            product.name!,
-            style: textTheme.displayLarge,
-          ),
-        const SizedBox(
-          height: 3.0,
-        ),
-        if (product.brands != null) ...[
-          Text(
-            'Cassegrain',
-            style: textTheme.displayMedium,
-          ),
+    return BlocBuilder<ProductBloc, ProductState>(
+        builder: (BuildContext context, ProductState state) {
+      final Product product = (state as LoadedProductState).product;
+
+      return Column(
+        mainAxisSize: MainAxisSize.min,
+        crossAxisAlignment: CrossAxisAlignment.start,
+        children: [
+          if (product.name != null)
+            Text(
+              product.name!,
+              style: textTheme.displayLarge,
+            ),
           const SizedBox(
-            height: 8.0,
+            height: 3.0,
           ),
+          if (product.brands != null) ...[
+            Text(
+              product.brands!.join(", "),
+              style: textTheme.displayMedium,
+            ),
+            const SizedBox(
+              height: 8.0,
+            ),
+          ],
+          if (product.altName != null)
+            Text(
+              product.altName!,
+              style: textTheme.headlineMedium,
+            ),
         ],
-        if (product.altName != null)
-          Text(
-            product.altName!,
-            style: textTheme.headlineMedium,
-          ),
-      ],
-    );
+      );
+    });
   }
 }
 

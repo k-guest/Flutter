@@ -1,33 +1,12 @@
 import 'package:flutter/material.dart';
-import 'package:lpdw_flutter/model/product.dart';
+import 'package:flutter_bloc/flutter_bloc.dart';
 import 'package:lpdw_flutter/res/app_icons.dart';
+import 'package:lpdw_flutter/screens/details/product_bloc.dart';
 import 'package:lpdw_flutter/screens/details/tabs/details_info.dart';
 import 'package:lpdw_flutter/screens/details/tabs/details_nutrition.dart';
 import 'package:lpdw_flutter/screens/details/tabs/details_nutritional_values.dart';
 import 'package:lpdw_flutter/screens/details/tabs/details_summary.dart';
 import 'package:share_plus/share_plus.dart';
-
-class ProductContainer extends InheritedWidget {
-  final Product product;
-
-  const ProductContainer({
-    Key? key,
-    required Widget child,
-    required this.product,
-  }) : super(key: key, child: child);
-
-  static ProductContainer of(BuildContext context) {
-    final ProductContainer? result =
-        context.dependOnInheritedWidgetOfExactType<ProductContainer>();
-    assert(result != null, 'No ProductContainer found in context');
-    return result!;
-  }
-
-  @override
-  bool updateShouldNotify(ProductContainer oldWidget) {
-    return product != oldWidget.product;
-  }
-}
 
 class ProductDetailsArgs {
   final String barcode;
@@ -74,104 +53,110 @@ class _ProductDetailsState extends State<ProductDetails> {
 
     return PrimaryScrollController(
       controller: _controller,
-      child: ProductContainer(
-        product: _generateFakeProduct(),
-        child: Scaffold(
-          body: Stack(
-            children: [
-              Positioned.fill(child: child),
-              Align(
-                alignment: AlignmentDirectional.topStart,
-                child: _HeaderIcon(
-                  icon: AppIcons.close,
-                  tooltip: 'Fermer l\'écran',
-                  onPressed: () {
-                    Navigator.of(context).maybePop();
-                  },
+      child: BlocProvider<ProductBloc>(
+        create: (_) {
+          ProductBloc bloc = ProductBloc();
+          bloc.add(LoadProductEvent(widget.args.barcode));
+          return bloc;
+        },
+        child: BlocBuilder<ProductBloc, ProductState>(
+          builder: (BuildContext context, ProductState state) {
+            if (state is LoadingProductState) {
+              // Loading
+              return const _ProductDetailsLoading();
+            } else if (state is LoadedProductState) {
+              // OK
+              return Scaffold(
+                body: Stack(
+                  children: [
+                    Positioned.fill(child: child),
+                    Align(
+                      alignment: AlignmentDirectional.topStart,
+                      child: _HeaderIcon(
+                        icon: AppIcons.close,
+                        tooltip: 'Fermer l\'écran',
+                        onPressed: () {
+                          Navigator.of(context).maybePop();
+                        },
+                      ),
+                    ),
+                    Align(
+                      alignment: AlignmentDirectional.topEnd,
+                      child: BlocBuilder<ProductBloc, ProductState>(
+                          builder: (BuildContext context, ProductState state) {
+                        if (state is! LoadedProductState) {
+                          return const SizedBox();
+                        }
+
+                        return _HeaderIcon(
+                          icon: AppIcons.share,
+                          tooltip: 'Partager',
+                          onPressed: () {
+                            Share.share(
+                              'https://fr.openfoodfacts.org/produit/${(state as LoadedProductState).product.barcode})}',
+                            );
+                          },
+                        );
+                      }),
+                    ),
+                  ],
                 ),
-              ),
-              Align(
-                alignment: AlignmentDirectional.topEnd,
-                child: Builder(builder: (context) {
-                  return _HeaderIcon(
-                    icon: AppIcons.share,
-                    tooltip: 'Partager',
-                    onPressed: () {
-                      Share.share(
-                        'https://fr.openfoodfacts.org/produit/${ProductContainer.of(context).product.barcode}',
-                      );
-                    },
-                  );
-                }),
-              ),
-            ],
-          ),
-          bottomNavigationBar: BottomNavigationBar(
-            onTap: (int selectedPosition) {
-              ProductDetailsTab newTab =
-                  ProductDetailsTab.values[selectedPosition];
+                bottomNavigationBar: BottomNavigationBar(
+                  onTap: (int selectedPosition) {
+                    ProductDetailsTab newTab =
+                        ProductDetailsTab.values[selectedPosition];
 
-              if (newTab != _currentTab) {
-                if (_controller.hasClients) {
-                  _controller.jumpTo(0.0);
-                }
+                    if (newTab != _currentTab) {
+                      if (_controller.hasClients) {
+                        _controller.jumpTo(0.0);
+                      }
 
-                setState(() {
-                  _currentTab = newTab;
-                });
-              }
-            },
-            items: ProductDetailsTab.values.map((e) {
-              String? label;
-              IconData? icon;
+                      setState(() {
+                        _currentTab = newTab;
+                      });
+                    }
+                  },
+                  items: ProductDetailsTab.values.map((e) {
+                    String? label;
+                    IconData? icon;
 
-              switch (e) {
-                case ProductDetailsTab.info:
-                  icon = AppIcons.tab_barcode;
-                  label = "Fiche";
-                  break;
-                case ProductDetailsTab.nutritionalValues:
-                  icon = AppIcons.tab_fridge;
-                  label = "Caractéristiques";
-                  break;
-                case ProductDetailsTab.nutrition:
-                  icon = AppIcons.tab_nutrition;
-                  label = "Nutrition";
-                  break;
-                case ProductDetailsTab.summary:
-                  icon = AppIcons.tab_array;
-                  label = "Tableau";
-              }
+                    switch (e) {
+                      case ProductDetailsTab.info:
+                        icon = AppIcons.tab_barcode;
+                        label = "Fiche";
+                        break;
+                      case ProductDetailsTab.nutritionalValues:
+                        icon = AppIcons.tab_fridge;
+                        label = "Caractéristiques";
+                        break;
+                      case ProductDetailsTab.nutrition:
+                        icon = AppIcons.tab_nutrition;
+                        label = "Nutrition";
+                        break;
+                      case ProductDetailsTab.summary:
+                        icon = AppIcons.tab_array;
+                        label = "Tableau";
+                    }
 
-              if (label == null || icon == null) {
-                throw Exception("Tab $e not implemented!");
-              }
+                    if (label == null || icon == null) {
+                      throw Exception("Tab $e not implemented!");
+                    }
 
-              return BottomNavigationBarItem(
-                icon: Icon(icon),
-                label: label,
+                    return BottomNavigationBarItem(
+                      icon: Icon(icon),
+                      label: label,
+                    );
+                  }).toList(growable: false),
+                  currentIndex: _currentTab.index,
+                ),
               );
-            }).toList(growable: false),
-            currentIndex: _currentTab.index,
-          ),
+            } else {
+              // Erreur
+              return const ProductDetailsError();
+            }
+          },
         ),
       ),
-    );
-  }
-
-  Product _generateFakeProduct() {
-    return Product(
-      barcode: '123456789',
-      name: 'Petits pois et carottes',
-      brands: ['Cassegrain'],
-      altName: 'Petits pois & carottes à l\'étuvée avec garniture',
-      nutriScore: ProductNutriscore.A,
-      novaScore: ProductNovaScore.Group1,
-      ecoScore: ProductEcoScore.D,
-      quantity: '200g (égoutté 130g)',
-      manufacturingCountries: ['France'],
-      picture:
-          'https://images.unsplash.com/photo-1482049016688-2d3e1b311543?ixlib=rb-1.2.1&ixid=MnwxMjA3fDB8MHxwaG90by1wYWdlfHx8fGVufDB8fHx8&auto=format&fit=crop&w=1610&q=80',
     );
   }
 
@@ -179,6 +164,36 @@ class _ProductDetailsState extends State<ProductDetails> {
   void dispose() {
     _controller.dispose();
     super.dispose();
+  }
+}
+
+class ProductDetailsError extends StatelessWidget {
+  const ProductDetailsError({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: Text("Erreur !"),
+      ),
+    );
+  }
+}
+
+class _ProductDetailsLoading extends StatelessWidget {
+  const _ProductDetailsLoading({
+    super.key,
+  });
+
+  @override
+  Widget build(BuildContext context) {
+    return const Scaffold(
+      body: Center(
+        child: CircularProgressIndicator.adaptive(),
+      ),
+    );
   }
 }
 
