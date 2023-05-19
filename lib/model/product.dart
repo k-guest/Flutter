@@ -16,6 +16,27 @@ class Product {
   final NutrientLevels? nutrientLevels;
   final NutritionFacts? nutritionFacts;
   final bool? ingredientsFromPalmOil;
+  final String? vegetables;
+  final String? water;
+  final String? sugar;
+  final String? trim;
+  final String? salt;
+  final String? naturalFlavors;
+  final String? allergenicSubstances;
+  final String? additivesNutrition;
+  final String? fatsLipids;
+  final String? saturatedFattyAcids;
+  final String? sugarSpecifications;
+  final String? saltSpecifications;
+  final String? energyTab;
+  final String? fatsLipidsTab;
+  final String? saturatedFattyAcidsTab;
+  final String? carbsTab;
+  final String? sugarTab;
+  final String? dietaryFibersTab;
+  final String? proteinsTab;
+  final String? saltTab;
+  final String? sodiumTab;
 
   Product(
       {required this.barcode,
@@ -34,6 +55,27 @@ class Product {
       this.additives,
       this.nutrientLevels,
       this.nutritionFacts,
+      this.vegetables,
+      this.water,
+      this.sugar,
+      this.trim,
+      this.salt,
+      this.naturalFlavors,
+      this.allergenicSubstances,
+      this.additivesNutrition,
+      this.fatsLipids,
+      this.saturatedFattyAcids,
+      this.sugarSpecifications,
+      this.saltSpecifications,
+      this.energyTab,
+      this.fatsLipidsTab,
+      this.saturatedFattyAcidsTab,
+      this.carbsTab,
+      this.sugarTab,
+      this.dietaryFibersTab,
+      this.proteinsTab,
+      this.saltTab,
+      this.sodiumTab,
       this.ingredientsFromPalmOil});
 }
 
